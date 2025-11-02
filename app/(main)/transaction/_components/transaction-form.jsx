@@ -60,10 +60,10 @@ export function AddTransactionForm({
             accountId: initialData.accountId,
             category: initialData.category,
             date: new Date(initialData.date),
-            isRecurring: initialData.isRecurring,
-            ...(initialData.recurringInterval && {
-              recurringInterval: initialData.recurringInterval,
-            }),
+            // isRecurring: initialData.isRecurring,
+            // ...(initialData.recurringInterval && {
+            //   recurringInterval: initialData.recurringInterval,
+            // }),
           }
         : {
             type: "EXPENSE",
@@ -71,7 +71,7 @@ export function AddTransactionForm({
             description: "",
             accountId: accounts.find((ac) => ac.isDefault)?.id,
             date: new Date(),
-            isRecurring: false,
+            // isRecurring: false,
           },
   });
 
@@ -263,46 +263,7 @@ export function AddTransactionForm({
           <p className="text-sm text-red-500">{errors.description.message}</p>
         )}
       </div>
-
-      {/* Recurring Toggle */}
-      <div className="flex flex-row items-center justify-between rounded-lg border p-4">
-        <div className="space-y-0.5">
-          <label className="text-base font-medium">Recurring Transaction</label>
-          <div className="text-sm text-muted-foreground">
-            Set up a recurring schedule for this transaction
-          </div>
-        </div>
-        <Switch
-          checked={isRecurring}
-          onCheckedChange={(checked) => setValue("isRecurring", checked)}
-        />
-      </div>
-
-      {/* Recurring Interval */}
-      {isRecurring && (
-        <div className="space-y-2">
-          <label className="text-sm font-medium">Recurring Interval</label>
-          <Select
-            onValueChange={(value) => setValue("recurringInterval", value)}
-            defaultValue={getValues("recurringInterval")}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select interval" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="DAILY">Daily</SelectItem>
-              <SelectItem value="WEEKLY">Weekly</SelectItem>
-              <SelectItem value="MONTHLY">Monthly</SelectItem>
-              <SelectItem value="YEARLY">Yearly</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.recurringInterval && (
-            <p className="text-sm text-red-500">
-              {errors.recurringInterval.message}
-            </p>
-          )}
-        </div>
-      )}
+         
 
       {/* Actions */}
       <div className="flex gap-4">

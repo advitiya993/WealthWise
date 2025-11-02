@@ -1,6 +1,5 @@
 "use server";
 
-import aj from "@/lib/arcjet";
 import { db } from "@/lib/prisma";
 import { request } from "@arcjet/next";
 import { auth } from "@clerk/nextjs/server";
@@ -56,32 +55,7 @@ export async function createAccount(data) {
     const { userId } = await auth();
     if (!userId) throw new Error("Unauthorized");
 
-    // Get request data for ArcJet
-    const req = await request();
-
-    // Check rate limit
-    const decision = await aj.protect(req, {
-      userId,
-      requested: 1, // Specify how many tokens to consume
-    });
-
-    if (decision.isDenied()) {
-      if (decision.reason.isRateLimit()) {
-        const { remaining, reset } = decision.reason;
-        console.error({
-          code: "RATE_LIMIT_EXCEEDED",
-          details: {
-            remaining,
-            resetInSeconds: reset,
-          },
-        });
-
-        throw new Error("Too many requests. Please try again later.");
-      }
-
-      throw new Error("Request blocked");
-    }
-
+        
     const user = await db.user.findUnique({
       where: { clerkUserId: userId },
     });
@@ -96,23 +70,7 @@ export async function createAccount(data) {
       throw new Error("Invalid balance amount");
     }
 
-    // Check if this is the user's first account
-    const existingAccounts = await db.account.findMany({
-      where: { userId: user.id },
-    });
-
-    // If it's the first account, make it default regardless of user input
-    // If not, use the user's preference
-    const shouldBeDefault =
-      existingAccounts.length === 0 ? true : data.isDefault;
-
-    // If this account should be default, unset other default accounts
-    if (shouldBeDefault) {
-      await db.account.updateMany({
-        where: { userId: user.id, isDefault: true },
-        data: { isDefault: false },
-      });
-    }
+  
 
     // Create new account
     const account = await db.account.create({
@@ -120,7 +78,7 @@ export async function createAccount(data) {
         ...data,
         balance: balanceFloat,
         userId: user.id,
-        isDefault: shouldBeDefault, // Override the isDefault based on our logic
+        isDefault: data.isDefault,
       },
     });
 
